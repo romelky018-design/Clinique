@@ -1,0 +1,1767 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dr Pierre Clinique — Gestion Clinique | Pétion-Ville</title>
+<style>
+:root{
+  --bg:#f4f6f9;
+  --sidebar:#0e2a3a;
+  --sidebar-2:#16394d;
+  --primary:#0ea5a4;
+  --primary-d:#0b8483;
+  --text:#16232c;
+  --muted:#6b7c88;
+  --border:#e2e8ee;
+  --card:#fff;
+  --danger:#e5484d;
+  --success:#12a594;
+  --warn:#f5a524;
+  --radius:12px;
+  --shadow:0 1px 2px rgba(16,24,40,.05), 0 4px 16px rgba(16,24,40,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:14px}
+
+/* ---------- Layout ---------- */
+.app{display:flex;min-height:100vh}
+.sidebar{
+  width:250px;flex-shrink:0;background:var(--sidebar);color:#fff;
+  display:flex;flex-direction:column;padding:20px 16px;position:sticky;top:0;height:100vh;z-index:60;
+}
+.brand{display:flex;gap:12px;align-items:center;padding:0 6px 22px;border-bottom:1px solid rgba(255,255,255,.1)}
+.logo{
+  width:42px;height:42px;border-radius:11px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--primary),#3dd6b5);
+  display:grid;place-items:center;font-weight:800;font-size:14px;color:#04262a;letter-spacing:.5px;
+}
+.brand h1{font-size:15px;font-weight:700;letter-spacing:.1px;line-height:1.15}
+.brand p{font-size:11px;color:#8fb0c2;margin-top:2px}
+nav{display:flex;flex-direction:column;gap:4px;margin-top:20px;flex:1}
+.nav-item{
+  display:flex;align-items:center;gap:11px;width:100%;padding:11px 13px;border:0;border-radius:9px;
+  background:transparent;color:#b9cfdc;font-weight:500;cursor:pointer;text-align:left;
+  transition:background .15s,color .15s;
+}
+.nav-item:hover{background:var(--sidebar-2);color:#fff}
+.nav-item.active{background:var(--primary);color:#04262a;font-weight:700}
+.nav-item .ic{font-size:16px;width:20px;text-align:center}
+.sidebar-foot{border-top:1px solid rgba(255,255,255,.1);padding-top:16px}
+.sidebar-foot label{display:block;font-size:11px;color:#8fb0c2;text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px}
+.sidebar-foot input{
+  width:100%;padding:9px 11px;border-radius:8px;border:1px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.07);color:#fff;outline:none;
+}
+.sidebar-foot input:focus{border-color:var(--primary)}
+.ghost-btn{
+  width:100%;margin-top:9px;padding:9px;border-radius:8px;cursor:pointer;
+  background:transparent;border:1px solid rgba(255,255,255,.18);color:#b9cfdc;font-size:12.5px;
+  transition:.15s;
+}
+.ghost-btn:hover{background:rgba(255,255,255,.08);color:#fff}
+
+.sidebar-backdrop{
+  position:fixed;inset:0;background:rgba(10,30,42,.55);z-index:55;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.sidebar-backdrop.show{opacity:1;pointer-events:auto}
+
+.main{flex:1;padding:28px 34px 60px;max-width:1400px;overflow-x:hidden;min-width:0}
+
+/* Mobile-only top header with hamburger */
+.mobile-header{
+  display:none;align-items:center;gap:12px;padding:12px 0 10px;margin-bottom:6px;
+  position:sticky;top:0;background:var(--bg);z-index:40;
+}
+.hamburger{
+  width:42px;height:42px;border-radius:10px;border:0;cursor:pointer;flex-shrink:0;
+  background:var(--sidebar);color:#fff;font-size:19px;display:flex;align-items:center;justify-content:center;
+  transition:.15s;
+}
+.hamburger:hover{background:var(--sidebar-2)}
+.mh-title{font-size:15px;font-weight:700;letter-spacing:-.1px}
+.mh-title small{display:block;font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.2px}
+
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:24px;flex-wrap:wrap}
+.topbar h2{font-size:23px;font-weight:700;letter-spacing:-.3px}
+.topbar .sub{color:var(--muted);font-size:13px;margin-top:3px}
+.view{display:none}
+.view.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;padding:10px 17px;border-radius:9px;border:0;
+  background:var(--primary);color:#04262a;font-weight:700;cursor:pointer;transition:.15s;
+  white-space:nowrap;
+}
+.btn:hover{background:var(--primary-d);color:#fff}
+.btn.sec{background:#fff;color:var(--text);border:1px solid var(--border)}
+.btn.sec:hover{background:#f7f9fb;border-color:#cfd8e0}
+.btn.sm{padding:7px 12px;font-size:12.5px;border-radius:7px}
+.btn.danger{background:#fdecec;color:var(--danger)}
+.btn.danger:hover{background:var(--danger);color:#fff}
+.icon-btn{
+  border:1px solid var(--border);background:#fff;border-radius:7px;width:32px;height:32px;
+  cursor:pointer;display:inline-grid;place-items:center;font-size:14px;transition:.15s;color:var(--muted);
+  vertical-align:middle;
+}
+.icon-btn:hover{background:#f2f6f9;color:var(--text);border-color:#cfd8e0}
+
+/* ---------- Date range filter ---------- */
+.date-range{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:#f8fbfc;border:1px solid var(--border);border-radius:10px;padding:7px 10px;
+}
+.date-range .dr-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.date-range input[type="date"]{
+  padding:6px 9px;border:1px solid var(--border);border-radius:7px;background:#fff;
+  color:var(--text);outline:none;font-size:12.5px;cursor:pointer;
+}
+.date-range input[type="date"]:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,164,.12)}
+.date-range .clear-dr{
+  border:0;background:#eef2f6;color:var(--muted);border-radius:7px;width:28px;height:28px;
+  cursor:pointer;font-size:13px;line-height:1;transition:.15s;
+}
+.date-range .clear-dr:hover{background:#e3eaef;color:var(--text)}
+.dr-quick{
+  border:1px solid var(--border);background:#fff;border-radius:7px;padding:6px 10px;
+  font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:.15s;
+}
+.dr-quick:hover{background:#e6f6f5;border-color:var(--primary);color:var(--primary-d)}
+
+/* ---------- Cards ---------- */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:16px;margin-bottom:22px}
+.kpi{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--primary)}
+.kpi.warn::before{background:var(--warn)}
+.kpi.danger::before{background:var(--danger)}
+.kpi.success::before{background:var(--success)}
+.kpi .lbl{font-size:11.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:600}
+.kpi .val{font-size:25px;font-weight:800;margin-top:8px;letter-spacing:-.6px}
+.kpi .val small{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:0}
+.kpi .meta{font-size:12px;color:var(--muted);margin-top:5px}
+
+.panel{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden;
+}
+.panel-head{
+  display:flex;justify-content:space-between;align-items:center;gap:14px;
+  padding:16px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;
+}
+.panel-head h3{font-size:15px;font-weight:700}
+.panel-body{padding:20px}
+.grid-2{display:grid;grid-template-columns:1.35fr 1fr;gap:20px;align-items:start}
+
+/* ---------- Chart ---------- */
+.chart{display:flex;align-items:flex-end;gap:14px;height:190px;padding:10px 4px 0}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end}
+.bar{
+  width:100%;max-width:52px;border-radius:7px 7px 3px 3px;
+  background:linear-gradient(180deg,#3dd6b5,var(--primary));
+  transition:height .5s cubic-bezier(.2,.8,.2,1);min-height:4px;
+}
+.bar-col span{font-size:11px;color:var(--muted);font-weight:600}
+.bar-col .amt{font-size:11px;font-weight:700;color:var(--text)}
+
+/* ---------- Tables ---------- */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{
+  text-align:left;padding:11px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--muted);font-weight:700;background:#fafcfd;border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+td{padding:13px 16px;border-bottom:1px solid #eef2f6;vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#fafcfd}
+.t-right{text-align:right}
+.name-cell{display:flex;align-items:center;gap:11px}
+.avatar{
+  width:34px;height:34px;border-radius:9px;flex-shrink:0;display:grid;place-items:center;
+  font-weight:700;font-size:12.5px;background:#e6f6f5;color:var(--primary-d);letter-spacing:.3px;
+}
+.name-cell b{display:block;font-weight:600;font-size:13.5px}
+.name-cell small{color:var(--muted);font-size:11.5px}
+
+.tag{
+  display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;
+  letter-spacing:.2px;white-space:nowrap;
+}
+.tag.dent{background:#e8f1fd;color:#1a6fd4}
+.tag.labo{background:#f3ebfd;color:#7c3aed}
+.tag.ophtal{background:#e4f7f3;color:#0a8a7c}
+.tag.paid{background:#e4f7f3;color:#0a8a7c}
+.tag.due{background:#fdecec;color:#c9353a}
+.tag.part{background:#fef4e3;color:#a9700a}
+.tag.htg{background:#eef2f6;color:#4b5c68}
+.tag.usd{background:#e8f1fd;color:#1a6fd4}
+
+.money{font-weight:700;font-variant-numeric:tabular-nums}
+.money.neg{color:var(--danger)}
+.money.pos{color:var(--success)}
+
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.search{
+  padding:9px 13px 9px 34px;border:1px solid var(--border);border-radius:9px;min-width:220px;
+  outline:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%236b7c88' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M21 21l-4.3-4.3'/%3E%3C/svg%3E") no-repeat 12px center;
+  transition:.15s;
+}
+.search:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,164,.12)}
+select.filter{
+  padding:9px 12px;border:1px solid var(--border);border-radius:9px;background:#fff;
+  color:var(--text);outline:none;cursor:pointer;
+}
+select.filter:focus{border-color:var(--primary)}
+
+.empty{text-align:center;padding:52px 20px;color:var(--muted)}
+.empty .big{font-size:36px;margin-bottom:10px;opacity:.5}
+.empty p{font-size:13.5px}
+
+/* ---------- Modal ---------- */
+.overlay{
+  position:fixed;inset:0;background:rgba(14,42,58,.55);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;padding:20px;z-index:100;
+}
+.overlay.open{display:flex;animation:fade .18s ease}
+.modal{
+  background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;
+  box-shadow:0 24px 60px rgba(14,42,58,.28);animation:pop .22s cubic-bezier(.2,.9,.3,1.2);
+}
+.modal.wide{max-width:760px}
+@keyframes pop{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:none}}
+.modal-head{
+  display:flex;justify-content:space-between;align-items:center;padding:20px 24px;
+  border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:2;border-radius:16px 16px 0 0;
+}
+.modal-head h3{font-size:17px;font-weight:700}
+.close-x{
+  border:0;background:#f2f6f9;width:32px;height:32px;border-radius:8px;cursor:pointer;
+  font-size:17px;color:var(--muted);line-height:1;transition:.15s;
+}
+.close-x:hover{background:#e6ecf1;color:var(--text)}
+.modal-body{padding:24px}
+.modal-foot{
+  display:flex;justify-content:flex-end;gap:10px;padding:18px 24px;border-top:1px solid var(--border);
+  background:#fafcfd;position:sticky;bottom:0;border-radius:0 0 16px 16px;flex-wrap:wrap;
+}
+
+/* ---------- Forms ---------- */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+.field label{font-size:12px;font-weight:700;color:#46596a;letter-spacing:.2px}
+.field label .req{color:var(--danger)}
+.field input,.field select,.field textarea{
+  padding:10px 13px;border:1px solid var(--border);border-radius:9px;outline:none;
+  background:#fff;color:var(--text);transition:.15s;width:100%;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,164,.13);
+}
+.field textarea{resize:vertical;min-height:74px}
+.hint{font-size:11.5px;color:var(--muted)}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg input{display:none}
+.seg label{
+  flex:1;min-width:120px;text-align:center;padding:10px;border:1px solid var(--border);border-radius:9px;
+  cursor:pointer;font-weight:600;font-size:13px;transition:.15s;color:var(--muted);
+}
+.seg input:checked + label{border-color:var(--primary);background:#e6f6f5;color:var(--primary-d);font-weight:700}
+
+/* ---------- Client detail ---------- */
+.detail-hero{
+  display:flex;gap:16px;align-items:center;padding:20px 24px;background:#f8fbfc;
+  border-bottom:1px solid var(--border);
+}
+.detail-hero .avatar{width:54px;height:54px;border-radius:14px;font-size:18px}
+.detail-hero h3{font-size:18px;font-weight:700;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.detail-hero p{color:var(--muted);font-size:12.5px;margin-top:4px}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:18px 24px;border-bottom:1px solid var(--border)}
+.stat-row div{text-align:center}
+.stat-row .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700}
+.stat-row .v{font-size:17px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums}
+
+/* ---------- Toast ---------- */
+#toast{
+  position:fixed;bottom:26px;right:26px;background:var(--sidebar);color:#fff;
+  padding:13px 20px;border-radius:11px;font-size:13.5px;font-weight:600;
+  box-shadow:0 12px 32px rgba(14,42,58,.3);transform:translateY(80px);opacity:0;
+  transition:.28s cubic-bezier(.2,.9,.3,1.2);z-index:200;pointer-events:none;
+  max-width:calc(100vw - 40px);
+}
+#toast.show{transform:none;opacity:1}
+#toast.err{background:var(--danger)}
+
+/* ---------- Responsive ---------- */
+@media(max-width:1080px){ .grid-2{grid-template-columns:1fr} }
+
+@media(max-width:820px){
+  .app{display:block}
+
+  /* Sidebar slides in from the left */
+  .sidebar{
+    position:fixed;
+    top:0;left:0;bottom:0;
+    width:272px;max-width:84vw;height:100vh;
+    transform:translateX(-100%);
+    transition:transform .3s cubic-bezier(.2,.9,.3,1.05);
+    overflow-y:auto;
+    box-shadow:6px 0 32px rgba(0,0,0,.28);
+  }
+  .sidebar.open{transform:translateX(0)}
+
+  .mobile-header{display:flex}
+
+  /* Restore vertical layout inside slide-out sidebar */
+  nav{flex-direction:column;overflow:visible;margin-top:20px;gap:4px}
+  .nav-item{width:100%;white-space:normal;padding:11px 13px;font-size:14px}
+  .sidebar-foot{display:block;margin-top:0;padding-top:16px}
+  .sidebar-foot input{width:100%}
+  .ghost-btn{width:100%;margin-top:9px}
+
+  .main{padding:0 16px 50px}
+  .topbar{margin-bottom:18px}
+  .topbar h2{font-size:20px}
+  .form-grid{grid-template-columns:1fr}
+  .stat-row{grid-template-columns:1fr;gap:14px}
+  .kpi .val{font-size:21px}
+  .date-range{width:100%}
+  .date-range input[type="date"]{flex:1;min-width:0}
+  .toolbar{width:100%}
+  .search{flex:1;min-width:0}
+  .chart{height:150px;gap:8px}
+  .bar-col .amt{font-size:10px}
+  .bar-col span{font-size:10px}
+  .modal-foot{flex-direction:column-reverse}
+  .modal-foot .btn{width:100%;justify-content:center}
+  #toast{left:20px;right:20px;bottom:20px}
+}
+
+@media(max-width:480px){
+  .kpi{padding:15px 16px}
+  .panel-head{padding:14px 16px}
+  .panel-body{padding:16px}
+  th,td{padding:10px 12px}
+  .avatar{width:30px;height:30px;font-size:11.5px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo">DP</div>
+      <div>
+        <h1>Dr Pierre Clinique</h1>
+        <p>Pétion-Ville, Haïti</p>
+      </div>
+    </div>
+
+    <nav>
+      <button class="nav-item active" data-view="dashboard"><span class="ic">◧</span> Tableau de bord</button>
+      <button class="nav-item" data-view="clients"><span class="ic">◍</span> Clients</button>
+      <button class="nav-item" data-view="finance"><span class="ic">◈</span> Finances</button>
+      <button class="nav-item" data-view="rapports"><span class="ic">◭</span> Rapports</button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <label>Taux USD → HTG</label>
+      <input id="tauxInput" type="number" step="0.5" min="1" value="132">
+      <button class="ghost-btn" id="resetBtn">Réinitialiser les données</button>
+    </div>
+  </aside>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <!-- Mobile header with hamburger -->
+    <header class="mobile-header">
+      <button class="hamburger" id="hamburgerBtn" aria-label="Ouvrir le menu">☰</button>
+      <div class="mh-title">
+        Dr Pierre Clinique
+        <small>Pétion-Ville, Haïti</small>
+      </div>
+    </header>
+
+    <!-- ---------- DASHBOARD ---------- -->
+    <section class="view active" id="view-dashboard">
+      <div class="topbar">
+        <div>
+          <h2>Tableau de bord</h2>
+          <div class="sub" id="todayLabel"></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn sec" onclick="openClientModal()">+ Nouveau client</button>
+          <button class="btn" onclick="openTxModal(null,'facture')">+ Nouvelle facture</button>
+        </div>
+      </div>
+
+      <div class="kpis" id="kpiRow"></div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Encaissements — 6 derniers mois</h3>
+          </div>
+          <div class="panel-body">
+            <div class="chart" id="chart"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Soldes impayés</h3>
+            <button class="btn sm sec" data-goto="clients">Voir tout</button>
+          </div>
+          <div class="table-wrap" id="debtorsWrap"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Dernières transactions</h3>
+          <button class="btn sm sec" data-goto="finance">Voir tout</button>
+        </div>
+        <div class="table-wrap" id="recentWrap"></div>
+      </div>
+    </section>
+
+    <!-- ---------- CLIENTS ---------- -->
+    <section class="view" id="view-clients">
+      <div class="topbar">
+        <div>
+          <h2>Clients</h2>
+          <div class="sub">Dossiers patients — dentaire, laboratoire &amp; ophtalmologie</div>
+        </div>
+        <button class="btn" onclick="openClientModal()">+ Nouveau client</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="toolbar">
+            <input class="search" id="clientSearch" placeholder="Rechercher un client…">
+            <select class="filter" id="clientFilter">
+              <option value="">Tous les services</option>
+              <option value="Dentaire">Dentaire</option>
+              <option value="Laboratoire">Laboratoire</option>
+              <option value="Ophtalmologie">Ophtalmologie</option>
+            </select>
+            <select class="filter" id="clientBalanceFilter">
+              <option value="">Tous les soldes</option>
+              <option value="due">Avec solde impayé</option>
+              <option value="clear">Soldes réglés</option>
+            </select>
+          </div>
+        </div>
+        <div class="panel-head" style="border-top:0">
+          <div class="date-range">
+            <span class="dr-label">Période</span>
+            <span class="dr-label" style="text-transform:none;letter-spacing:0">Du</span>
+            <input type="date" id="clientDateFrom">
+            <span class="dr-label" style="text-transform:none;letter-spacing:0">Au</span>
+            <input type="date" id="clientDateTo">
+            <button class="dr-quick" data-quick="client" data-days="30">30j</button>
+            <button class="dr-quick" data-quick="client" data-days="90">90j</button>
+            <button class="dr-quick" data-quick="client" data-days="365">1 an</button>
+            <button class="clear-dr" title="Effacer" data-clear="client">✕</button>
+          </div>
+          <span class="hint" id="clientCount"></span>
+        </div>
+        <div class="table-wrap" id="clientsWrap"></div>
+      </div>
+    </section>
+
+    <!-- ---------- FINANCE ---------- -->
+    <section class="view" id="view-finance">
+      <div class="topbar">
+        <div>
+          <h2>Finances</h2>
+          <div class="sub">Factures, paiements et suivi des encaissements</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn sec" onclick="openTxModal(null,'paiement')">+ Encaissement</button>
+          <button class="btn" onclick="openTxModal(null,'facture')">+ Facture</button>
+        </div>
+      </div>
+
+      <div class="kpis" id="finKpiRow"></div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="toolbar">
+            <input class="search" id="txSearch" placeholder="Rechercher…">
+            <select class="filter" id="txTypeFilter">
+              <option value="">Tous les types</option>
+              <option value="facture">Factures</option>
+              <option value="paiement">Paiements</option>
+            </select>
+          </div>
+          <button class="btn sm sec" id="exportTxBtn">Exporter CSV</button>
+        </div>
+        <div class="panel-head" style="border-top:0">
+          <div class="date-range">
+            <span class="dr-label">Période</span>
+            <span class="dr-label" style="text-transform:none;letter-spacing:0">Du</span>
+            <input type="date" id="financeDateFrom">
+            <span class="dr-label" style="text-transform:none;letter-spacing:0">Au</span>
+            <input type="date" id="financeDateTo">
+            <button class="dr-quick" data-quick="finance" data-days="30">30j</button>
+            <button class="dr-quick" data-quick="finance" data-days="90">90j</button>
+            <button class="dr-quick" data-quick="finance" data-days="365">1 an</button>
+            <button class="clear-dr" title="Effacer" data-clear="finance">✕</button>
+          </div>
+        </div>
+        <div class="table-wrap" id="txWrap"></div>
+      </div>
+    </section>
+
+    <!-- ---------- RAPPORTS ---------- -->
+    <section class="view" id="view-rapports">
+      <div class="topbar">
+        <div>
+          <h2>Rapports</h2>
+          <div class="sub">Analyse de l'activité et de la performance financière</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Filtre de période</h3>
+          <div class="date-range">
+            <span class="dr-label">Du</span>
+            <input type="date" id="rapportDateFrom">
+            <span class="dr-label">Au</span>
+            <input type="date" id="rapportDateTo">
+            <button class="dr-quick" data-quick="rapport" data-days="30">30j</button>
+            <button class="dr-quick" data-quick="rapport" data-days="90">90j</button>
+            <button class="dr-quick" data-quick="rapport" data-days="365">1 an</button>
+            <button class="clear-dr" title="Effacer" data-clear="rapport">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><h3>Revenu par service</h3></div>
+          <div class="panel-body" id="serviceReport"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Modes de paiement</h3></div>
+          <div class="panel-body" id="methodReport"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Résumé mensuel</h3></div>
+        <div class="table-wrap" id="monthlyWrap"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ============ CLIENT MODAL ============ -->
+<div class="overlay" id="clientOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="clientModalTitle">Nouveau client</h3>
+      <button class="close-x" onclick="closeModal('clientOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="c_id">
+      <div class="form-grid">
+        <div class="field">
+          <label>Prénom <span class="req">*</span></label>
+          <input id="c_prenom" placeholder="Marie">
+        </div>
+        <div class="field">
+          <label>Nom <span class="req">*</span></label>
+          <input id="c_nom" placeholder="Joseph">
+        </div>
+        <div class="field">
+          <label>Téléphone <span class="req">*</span></label>
+          <input id="c_tel" placeholder="+509 3712 3456">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input id="c_email" type="email" placeholder="marie@exemple.com">
+        </div>
+        <div class="field full">
+          <label>Adresse</label>
+          <input id="c_adresse" placeholder="Rue Grégoire, Pétion-Ville">
+        </div>
+        <div class="field full">
+          <label>Service</label>
+          <div class="seg">
+            <input type="radio" name="c_service" id="svc_dent" value="Dentaire" checked>
+            <label for="svc_dent">🦷 Dentaire</label>
+            <input type="radio" name="c_service" id="svc_labo" value="Laboratoire">
+            <label for="svc_labo">🔬 Laboratoire</label>
+            <input type="radio" name="c_service" id="svc_ophtal" value="Ophtalmologie">
+            <label for="svc_ophtal">👁️ Ophtalmologie</label>
+          </div>
+        </div>
+        <div class="field full">
+          <label>Notes</label>
+          <textarea id="c_notes" placeholder="Antécédents, observations…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn sec" onclick="closeModal('clientOverlay')">Annuler</button>
+      <button class="btn" onclick="saveClient()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TRANSACTION MODAL ============ -->
+<div class="overlay" id="txOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="txModalTitle">Nouvelle facture</h3>
+      <button class="close-x" onclick="closeModal('txOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="t_id">
+      <div class="form-grid">
+        <div class="field full">
+          <label>Client <span class="req">*</span></label>
+          <select id="t_client"></select>
+        </div>
+        <div class="field full">
+          <label>Type</label>
+          <div class="seg">
+            <input type="radio" name="t_type" id="ty_fact" value="facture" checked>
+            <label for="ty_fact">📄 Facture</label>
+            <input type="radio" name="t_type" id="ty_pay" value="paiement">
+            <label for="ty_pay">💵 Paiement</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Montant <span class="req">*</span></label>
+          <input id="t_montant" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label>Devise</label>
+          <select id="t_devise">
+            <option value="HTG">HTG — Gourde</option>
+            <option value="USD">USD — Dollar</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Date</label>
+          <input id="t_date" type="date">
+        </div>
+        <div class="field">
+          <label>Mode de paiement</label>
+          <select id="t_methode">
+            <option value="Espèces">Espèces</option>
+            <option value="MonCash">MonCash</option>
+            <option value="Virement">Virement bancaire</option>
+            <option value="Chèque">Chèque</option>
+            <option value="Carte">Carte</option>
+            <option value="—">—</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label>Description</label>
+          <input id="t_note" placeholder="Détartrage, couronne céramique, analyse sanguine…">
+        </div>
+      </div>
+      <p class="hint" id="txBalanceHint" style="margin-top:14px"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn sec" onclick="closeModal('txOverlay')">Annuler</button>
+      <button class="btn" onclick="saveTx()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CLIENT DETAIL MODAL ============ -->
+<div class="overlay" id="detailOverlay">
+  <div class="modal wide">
+    <div class="modal-head">
+      <h3>Dossier client</h3>
+      <button class="close-x" onclick="closeModal('detailOverlay')">✕</button>
+    </div>
+    <div id="detailContent"></div>
+    <div class="modal-foot">
+      <button class="btn sec" onclick="closeModal('detailOverlay')">Fermer</button>
+      <button class="btn sec" id="detailPayBtn">+ Encaissement</button>
+      <button class="btn" id="detailInvBtn">+ Facture</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* =========================================================
+   0. CONSTANTES
+   ========================================================= */
+const SERVICES = ['Dentaire', 'Laboratoire', 'Ophtalmologie'];
+const SERVICE_TAG  = { Dentaire:'dent', Laboratoire:'labo', Ophtalmologie:'ophtal' };
+const SERVICE_ICON = { Dentaire:'🦷', Laboratoire:'🔬', Ophtalmologie:'👁️' };
+
+/* =========================================================
+   1. UTILITAIRES
+   ========================================================= */
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+const fmt   = n => Math.round(n).toLocaleString('fr-FR');
+const todayISO = () => new Date().toISOString().slice(0, 10);
+const dateFR = iso => {
+  if (!iso) return '—';
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+};
+const initials = (p, n) => ((p?.[0] || '') + (n?.[0] || '')).toUpperCase() || '?';
+const svcTag  = s => SERVICE_TAG[s] || 'htg';
+
+function toast(msg, isErr = false) {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.className = isErr ? 'show err' : 'show';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => (el.className = ''), 2600);
+}
+
+/* Date range helper */
+function inRange(dateStr, from, to) {
+  if (from && dateStr < from) return false;
+  if (to   && dateStr > to)   return false;
+  return true;
+}
+
+/* =========================================================
+   2. ÉTAT & PERSISTANCE
+   ========================================================= */
+const DB_KEY = 'drpierre_clinique_v2';
+
+let db = {
+  clients: [],
+  transactions: [],
+  settings: { taux: 132 },
+  seq: 1
+};
+
+function save() { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+
+function load() {
+  const raw = localStorage.getItem(DB_KEY);
+  if (raw) {
+    try {
+      db = JSON.parse(raw);
+      db.settings = db.settings || { taux: 132 };
+      db.seq = db.seq || (db.clients.length + 1);
+      return true;
+    } catch (e) {}
+  }
+  return false;
+}
+
+function toHTG(montant, devise) {
+  const m = Number(montant) || 0;
+  return devise === 'USD' ? m * (Number(db.settings.taux) || 132) : m;
+}
+
+/* =========================================================
+   3. CALCULS MÉTIER
+   ========================================================= */
+function clientTotals(clientId, from, to) {
+  let facture = 0, paye = 0;
+  for (const t of db.transactions) {
+    if (t.clientId !== clientId) continue;
+    if (from !== undefined || to !== undefined) {
+      if (!inRange(t.date, from || '', to || '')) continue;
+    }
+    const v = toHTG(t.montant, t.devise);
+    if (t.type === 'facture') facture += v; else paye += v;
+  }
+  return { facture, paye, solde: facture - paye };
+}
+
+function globalTotals(from, to) {
+  let facture = 0, paye = 0;
+  for (const t of db.transactions) {
+    if ((from || to) && !inRange(t.date, from || '', to || '')) continue;
+    const v = toHTG(t.montant, t.devise);
+    if (t.type === 'facture') facture += v; else paye += v;
+  }
+  return { facture, paye, solde: facture - paye };
+}
+
+function getClient(id) { return db.clients.find(c => c.id === id); }
+
+/* =========================================================
+   4. DONNÉES DE DÉMONSTRATION
+   ========================================================= */
+function seed() {
+  const names = [
+    ['Marie',   'Joseph',    '+509 3712 3456', 'Dentaire',       'Rue Grégoire, Pétion-Ville'],
+    ['Jean',    'Baptiste',  '+509 4455 8899', 'Laboratoire',    'Delmas 33, Port-au-Prince'],
+    ['Nadège',  'Pierre',    '+509 3120 7788', 'Dentaire',       'Rue Lambert, Pétion-Ville'],
+    ['Wesley',  'Charles',   '+509 3988 1122', 'Ophtalmologie',  'Fermathe, Kenscoff'],
+    ['Fabiola', 'Mérisier',  '+509 3611 4400', 'Dentaire',       'Place Saint-Pierre, Pétion-Ville'],
+    ['Ricardo', 'Damus',     '+509 4777 2200', 'Laboratoire',    'Rue Chavannes, Pétion-Ville'],
+    ['Mirlande','Augustin',  '+509 3344 5566', 'Ophtalmologie',  'Rue Faubert, Pétion-Ville'],
+    ['Kervens', 'Alexandre', '+509 3912 7788', 'Ophtalmologie',  'Bourdon, Port-au-Prince']
+  ];
+
+  db.clients = names.map(([prenom, nom, tel, service, adresse], i) => ({
+    id: uid(),
+    code: 'CL-' + String(i + 1).padStart(4, '0'),
+    prenom, nom, tel, service, adresse,
+    email: '', notes: '',
+    createdAt: new Date().toISOString().slice(0, 10)
+  }));
+  db.seq = names.length + 1;
+
+  const now = new Date();
+  const iso = d => new Date(d).toISOString().slice(0, 10);
+  const txs = [];
+
+  const push = (ci, type, montant, devise, offsetDays, note, methode) => {
+    const d = new Date(now);
+    d.setDate(d.getDate() - offsetDays);
+    txs.push({
+      id: uid(),
+      clientId: db.clients[ci].id,
+      type, montant, devise,
+      date: iso(d),
+      methode: methode || (type === 'paiement' ? 'Espèces' : '—'),
+      note,
+      createdAt: d.toISOString()
+    });
+  };
+
+  push(0, 'facture', 12500, 'HTG', 165, 'Détartrage + 2 plombages');
+  push(0, 'paiement', 12500, 'HTG', 160, 'Règlement complet', 'MonCash');
+  push(1, 'facture',  180,  'USD', 150, 'Hémogramme complet');
+  push(1, 'paiement',  100,  'USD', 145, 'Acompte', 'Virement');
+  push(2, 'facture', 24000, 'HTG', 128, 'Couronne céramique');
+  push(2, 'paiement', 12000, 'HTG', 120, '1ère tranche', 'Espèces');
+  push(3, 'facture', 21000, 'HTG', 140, 'Examen de la vue + lunettes');
+  push(3, 'paiement', 21000, 'HTG', 135, 'Règlement complet', 'MonCash');
+  push(3, 'facture',   95,  'USD', 96,  'Fond d\'œil + tonométrie');
+  push(3, 'paiement',   95,  'USD', 90,  'Règlement', 'MonCash');
+  push(4, 'facture', 18500, 'HTG', 70,  'Extraction dentaire + radio');
+  push(4, 'paiement', 10000, 'HTG', 65,  'Acompte', 'Espèces');
+  push(5, 'facture',  140,  'USD', 42,  'Test thyroïdien TSH/T4');
+  push(6, 'facture', 32000, 'HTG', 38,  'Chirurgie cataracte — phase 1');
+  push(6, 'paiement', 20000, 'HTG', 32,  'Acompte', 'Virement');
+  push(0, 'facture',  8500, 'HTG', 30,  'Consultation + détartrage');
+  push(0, 'paiement', 8500, 'HTG', 28,  'Règlement', 'MonCash');
+  push(2, 'paiement', 12000, 'HTG', 20,  '2ème tranche', 'Virement');
+  push(5, 'paiement',  70,  'USD', 12,  'Acompte', 'MonCash');
+  push(4, 'facture', 32000, 'HTG', 8,   'Implant dentaire — phase 1');
+  push(7, 'facture', 15500, 'HTG', 6,   'Consultation ophtalmo + prescription');
+  push(1, 'facture',  210,  'USD', 5,   'Profil lipidique + glycémie');
+  push(7, 'paiement',  8000, 'HTG', 3,  'Acompte', 'MonCash');
+  push(3, 'paiement',  40,  'USD', 2,   'Acompte', 'Espèces');
+  push(4, 'paiement', 15000, 'HTG', 1,  'Acompte implant', 'MonCash');
+  push(6, 'paiement', 12000, 'HTG', 1,  '2ème tranche cataracte', 'Virement');
+
+  db.transactions = txs;
+  save();
+}
+
+/* =========================================================
+   5. NAVIGATION + HAMBURGER
+   ========================================================= */
+const sidebar = $('#sidebar');
+const backdrop = $('#sidebarBackdrop');
+
+function openSidebar() {
+  sidebar.classList.add('open');
+  backdrop.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  sidebar.classList.remove('open');
+  backdrop.classList.remove('show');
+  document.body.style.overflow = '';
+}
+function toggleSidebar() {
+  sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+}
+
+$('#hamburgerBtn').addEventListener('click', toggleSidebar);
+backdrop.addEventListener('click', closeSidebar);
+
+function switchView(name) {
+  $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+  $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
+
+  // Close sidebar on mobile after choosing a section
+  if (window.innerWidth <= 820) closeSidebar();
+
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'clients')   renderClients();
+  if (name === 'finance')   renderFinance();
+  if (name === 'rapports')  renderReports();
+}
+
+$$('.nav-item').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
+$$('[data-goto]').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.goto)));
+
+/* =========================================================
+   6. TABLEAU DE BORD
+   ========================================================= */
+function renderDashboard() {
+  const g = globalTotals();
+  const today = todayISO();
+
+  const encaisseJour = db.transactions
+    .filter(t => t.type === 'paiement' && t.date === today)
+    .reduce((s, t) => s + toHTG(t.montant, t.devise), 0);
+
+  const debutMois = today.slice(0, 8) + '01';
+  const encaisseMois = db.transactions
+    .filter(t => t.type === 'paiement' && t.date >= debutMois)
+    .reduce((s, t) => s + toHTG(t.montant, t.devise), 0);
+
+  const actifs = db.clients.length;
+  const debiteurs = db.clients.filter(c => clientTotals(c.id).solde > 0.5).length;
+  const tauxRecouvrement = g.facture > 0 ? (g.paye / g.facture) * 100 : 0;
+
+  $('#todayLabel').textContent = new Date().toLocaleDateString('fr-FR', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  $('#kpiRow').innerHTML = `
+    <div class="kpi success">
+      <div class="lbl">Encaissé aujourd'hui</div>
+      <div class="val">${fmt(encaisseJour)} <small>HTG</small></div>
+      <div class="meta">${db.transactions.filter(t => t.type === 'paiement' && t.date === today).length} paiement(s)</div>
+    </div>
+    <div class="kpi success">
+      <div class="lbl">Encaissé ce mois</div>
+      <div class="val">${fmt(encaisseMois)} <small>HTG</small></div>
+      <div class="meta">Depuis le ${dateFR(debutMois)}</div>
+    </div>
+    <div class="kpi">
+      <div class="lbl">Total facturé</div>
+      <div class="val">${fmt(g.facture)} <small>HTG</small></div>
+      <div class="meta">${db.transactions.filter(t => t.type === 'facture').length} facture(s)</div>
+    </div>
+    <div class="kpi ${g.solde > 0 ? 'danger' : 'success'}">
+      <div class="lbl">Solde impayé</div>
+      <div class="val">${fmt(g.solde)} <small>HTG</small></div>
+      <div class="meta">${debiteurs} client(s) débiteur(s)</div>
+    </div>
+    <div class="kpi ${tauxRecouvrement >= 80 ? 'success' : 'warn'}">
+      <div class="lbl">Taux de recouvrement</div>
+      <div class="val">${tauxRecouvrement.toFixed(1)}<small>%</small></div>
+      <div class="meta">${actifs} clients enregistrés</div>
+    </div>
+  `;
+
+  renderChart();
+  renderDebtors();
+  renderRecent();
+}
+
+function last6Months() {
+  const out = [];
+  const d = new Date();
+  d.setDate(1);
+  for (let i = 5; i >= 0; i--) {
+    const dt = new Date(d.getFullYear(), d.getMonth() - i, 1);
+    out.push({
+      key: `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`,
+      label: dt.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', ''),
+      total: 0
+    });
+  }
+  return out;
+}
+
+function renderChart() {
+  const months = last6Months();
+  db.transactions.forEach(t => {
+    if (t.type !== 'paiement') return;
+    const k = t.date.slice(0, 7);
+    const m = months.find(x => x.key === k);
+    if (m) m.total += toHTG(t.montant, t.devise);
+  });
+
+  const max = Math.max(...months.map(m => m.total), 1);
+  $('#chart').innerHTML = months.map(m => {
+    const h = Math.max((m.total / max) * 100, 2);
+    return `<div class="bar-col">
+      <div class="amt">${m.total > 0 ? fmt(m.total / 1000) + 'k' : ''}</div>
+      <div class="bar" style="height:${h}%"></div>
+      <span>${m.label}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderDebtors() {
+  const rows = db.clients
+    .map(c => ({ c, t: clientTotals(c.id) }))
+    .filter(x => x.t.solde > 0.5)
+    .sort((a, b) => b.t.solde - a.t.solde)
+    .slice(0, 6);
+
+  if (!rows.length) {
+    $('#debtorsWrap').innerHTML = `<div class="empty"><div class="big">✓</div><p>Aucun solde impayé. Excellent !</p></div>`;
+    return;
+  }
+
+  $('#debtorsWrap').innerHTML = `
+    <table>
+      <thead><tr><th>Client</th><th class="t-right">Solde dû</th></tr></thead>
+      <tbody>
+        ${rows.map(({ c, t }) => `
+          <tr onclick="openDetail('${c.id}')" style="cursor:pointer">
+            <td>
+              <div class="name-cell">
+                <div class="avatar">${initials(c.prenom, c.nom)}</div>
+                <div><b>${c.prenom} ${c.nom}</b><small>${c.tel}</small></div>
+              </div>
+            </td>
+            <td class="t-right money neg">${fmt(t.solde)} HTG</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function renderRecent() {
+  const rows = [...db.transactions]
+    .sort((a, b) => (b.date + b.createdAt).localeCompare(a.date + a.createdAt))
+    .slice(0, 7);
+
+  if (!rows.length) {
+    $('#recentWrap').innerHTML = `<div class="empty"><div class="big">◈</div><p>Aucune transaction enregistrée.</p></div>`;
+    return;
+  }
+
+  $('#recentWrap').innerHTML = `
+    <table>
+      <thead><tr><th>Date</th><th>Client</th><th>Description</th><th>Type</th><th class="t-right">Montant</th></tr></thead>
+      <tbody>
+        ${rows.map(t => {
+          const c = getClient(t.clientId);
+          const nom = c ? `${c.prenom} ${c.nom}` : 'Client supprimé';
+          const isPay = t.type === 'paiement';
+          const montantHTG = toHTG(t.montant, t.devise);
+          return `<tr>
+            <td style="color:var(--muted);white-space:nowrap">${dateFR(t.date)}</td>
+            <td><b style="font-weight:600">${nom}</b></td>
+            <td style="color:var(--muted)">${t.note || '—'}</td>
+            <td><span class="tag ${isPay ? 'paid' : 'due'}">${isPay ? 'Paiement' : 'Facture'}</span></td>
+            <td class="t-right money ${isPay ? 'pos' : ''}">
+              ${isPay ? '+' : ''}${fmt(montantHTG)} HTG
+              ${t.devise === 'USD' ? `<div style="font-size:11px;color:var(--muted);font-weight:500">$${fmt(t.montant)} USD</div>` : ''}
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+/* =========================================================
+   7. CLIENTS
+   ========================================================= */
+function renderClients() {
+  const q    = $('#clientSearch').value.trim().toLowerCase();
+  const svc  = $('#clientFilter').value;
+  const bal  = $('#clientBalanceFilter').value;
+  const from = $('#clientDateFrom').value;
+  const to   = $('#clientDateTo').value;
+  const hasRange = !!(from || to);
+
+  let list = db.clients.map(c => ({ c, t: clientTotals(c.id, from, to) }));
+
+  if (q) {
+    list = list.filter(({ c }) =>
+      `${c.prenom} ${c.nom} ${c.tel} ${c.email} ${c.code} ${c.adresse}`.toLowerCase().includes(q)
+    );
+  }
+  if (svc) list = list.filter(({ c }) => c.service === svc);
+  if (bal === 'due')   list = list.filter(({ t }) => t.solde > 0.5);
+  if (bal === 'clear') list = list.filter(({ t }) => t.solde <= 0.5);
+
+  // Si une période est active, ne garder que les clients ayant de l'activité
+  if (hasRange) {
+    list = list.filter(({ c }) =>
+      db.transactions.some(t => t.clientId === c.id && inRange(t.date, from, to))
+    );
+  }
+
+  list.sort((a, b) => b.t.solde - a.t.solde);
+
+  $('#clientCount').textContent =
+    `${list.length} client(s) affiché(s) sur ${db.clients.length}` +
+    (hasRange ? ` — période ${from ? dateFR(from) : '…'} → ${to ? dateFR(to) : '…'}` : '');
+
+  if (!list.length) {
+    $('#clientsWrap').innerHTML = `<div class="empty"><div class="big">◍</div><p>Aucun client ne correspond à votre recherche.</p></div>`;
+    return;
+  }
+
+  $('#clientsWrap').innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Client</th><th>Contact</th><th>Service</th>
+          <th class="t-right">Facturé</th><th class="t-right">Payé</th>
+          <th class="t-right">Solde</th><th>Statut</th><th class="t-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${list.map(({ c, t }) => {
+          const statut = t.solde > 0.5
+            ? (t.paye > 0 ? '<span class="tag part">Partiel</span>' : '<span class="tag due">Impayé</span>')
+            : '<span class="tag paid">Réglé</span>';
+          return `<tr>
+            <td>
+              <div class="name-cell">
+                <div class="avatar">${initials(c.prenom, c.nom)}</div>
+                <div><b>${c.prenom} ${c.nom}</b><small>${c.code} · ${dateFR(c.createdAt)}</small></div>
+              </div>
+            </td>
+            <td>
+              <div style="font-size:13px">${c.tel}</div>
+              <div style="font-size:11.5px;color:var(--muted)">${c.adresse || '—'}</div>
+            </td>
+            <td><span class="tag ${svcTag(c.service)}">${c.service}</span></td>
+            <td class="t-right money">${fmt(t.facture)}</td>
+            <td class="t-right money pos">${fmt(t.paye)}</td>
+            <td class="t-right money ${t.solde > 0.5 ? 'neg' : ''}">${fmt(t.solde)}</td>
+            <td>${statut}</td>
+            <td class="t-right" style="white-space:nowrap">
+              <button class="icon-btn" title="Voir le dossier" onclick="openDetail('${c.id}')">◉</button>
+              <button class="icon-btn" title="Modifier" onclick="openClientModal('${c.id}')">✎</button>
+              <button class="icon-btn" title="Supprimer" onclick="deleteClient('${c.id}')">✕</button>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+['clientSearch', 'clientFilter', 'clientBalanceFilter', 'clientDateFrom', 'clientDateTo']
+  .forEach(id => $('#' + id).addEventListener('input', renderClients));
+
+/* ---------- Modal client ---------- */
+function openClientModal(id) {
+  const c = id ? getClient(id) : null;
+  $('#clientModalTitle').textContent = c ? 'Modifier le client' : 'Nouveau client';
+  $('#c_id').value     = c ? c.id : '';
+  $('#c_prenom').value = c ? c.prenom : '';
+  $('#c_nom').value    = c ? c.nom : '';
+  $('#c_tel').value    = c ? c.tel : '';
+  $('#c_email').value  = c ? (c.email || '') : '';
+  $('#c_adresse').value= c ? (c.adresse || '') : '';
+  $('#c_notes').value  = c ? (c.notes || '') : '';
+
+  const service = c ? c.service : 'Dentaire';
+  $('#svc_dent').checked   = service === 'Dentaire';
+  $('#svc_labo').checked   = service === 'Laboratoire';
+  $('#svc_ophtal').checked = service === 'Ophtalmologie';
+
+  $('#clientOverlay').classList.add('open');
+  setTimeout(() => $('#c_prenom').focus(), 60);
+}
+
+function saveClient() {
+  const prenom = $('#c_prenom').value.trim();
+  const nom    = $('#c_nom').value.trim();
+  const tel    = $('#c_tel').value.trim();
+
+  if (!prenom || !nom || !tel) {
+    toast('Prénom, nom et téléphone sont obligatoires.', true);
+    return;
+  }
+
+  const id = $('#c_id').value;
+  let service = 'Dentaire';
+  if ($('#svc_labo').checked)   service = 'Laboratoire';
+  if ($('#svc_ophtal').checked) service = 'Ophtalmologie';
+
+  const data = {
+    prenom, nom, tel, service,
+    email:   $('#c_email').value.trim(),
+    adresse: $('#c_adresse').value.trim(),
+    notes:   $('#c_notes').value.trim()
+  };
+
+  if (id) {
+    Object.assign(getClient(id), data);
+    toast('Client mis à jour.');
+  } else {
+    db.clients.push({
+      id: uid(),
+      code: 'CL-' + String(db.seq++).padStart(4, '0'),
+      createdAt: todayISO(),
+      ...data
+    });
+    toast('Client ajouté avec succès.');
+  }
+
+  save();
+  closeModal('clientOverlay');
+  refreshAll();
+}
+
+function deleteClient(id) {
+  const c = getClient(id);
+  const t = clientTotals(id);
+  if (!c) return;
+
+  let msg = `Supprimer ${c.prenom} ${c.nom} ?`;
+  if (t.solde > 0.5) msg += `\n\n⚠ Ce client a un solde impayé de ${fmt(t.solde)} HTG.`;
+  if (!confirm(msg)) return;
+
+  db.clients = db.clients.filter(x => x.id !== id);
+  db.transactions = db.transactions.filter(x => x.clientId !== id);
+  save();
+  toast('Client supprimé.');
+  refreshAll();
+}
+
+/* =========================================================
+   8. FINANCES
+   ========================================================= */
+function renderFinance() {
+  const from = $('#financeDateFrom').value;
+  const to   = $('#financeDateTo').value;
+  const hasRange = !!(from || to);
+
+  const g = globalTotals(from, to);
+  const today = todayISO();
+
+  const debutMois = today.slice(0, 8) + '01';
+  const encaisseMois = db.transactions
+    .filter(t => t.type === 'paiement' && t.date >= debutMois)
+    .reduce((s, t) => s + toHTG(t.montant, t.devise), 0);
+
+  const factureMois = db.transactions
+    .filter(t => t.type === 'facture' && t.date >= debutMois)
+    .reduce((s, t) => s + toHTG(t.montant, t.devise), 0);
+
+  const rangeLabel = hasRange
+    ? `Période : ${from ? dateFR(from) : '…'} → ${to ? dateFR(to) : '…'}`
+    : 'Toute la période';
+
+  $('#finKpiRow').innerHTML = `
+    <div class="kpi">
+      <div class="lbl">Total facturé</div>
+      <div class="val">${fmt(g.facture)} <small>HTG</small></div>
+      <div class="meta">${rangeLabel}</div>
+    </div>
+    <div class="kpi success">
+      <div class="lbl">Total encaissé</div>
+      <div class="val">${fmt(g.paye)} <small>HTG</small></div>
+      <div class="meta">${rangeLabel}</div>
+    </div>
+    <div class="kpi danger">
+      <div class="lbl">Reste à recouvrer</div>
+      <div class="val">${fmt(g.solde)} <small>HTG</small></div>
+      <div class="meta">${rangeLabel}</div>
+    </div>
+    <div class="kpi warn">
+      <div class="lbl">Mois en cours</div>
+      <div class="val">${fmt(encaisseMois)} <small>HTG</small></div>
+      <div class="meta">Facturé : ${fmt(factureMois)} HTG</div>
+    </div>
+  `;
+
+  renderTxTable();
+}
+
+function filteredTx() {
+  const q    = $('#txSearch').value.trim().toLowerCase();
+  const type = $('#txTypeFilter').value;
+  const from = $('#financeDateFrom').value;
+  const to   = $('#financeDateTo').value;
+
+  let list = [...db.transactions];
+
+  if (type) list = list.filter(t => t.type === type);
+  if (from || to) list = list.filter(t => inRange(t.date, from, to));
+
+  if (q) {
+    list = list.filter(t => {
+      const c = getClient(t.clientId);
+      const hay = `${c ? c.prenom + ' ' + c.nom : ''} ${t.note} ${t.methode} ${t.devise}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  list.sort((a, b) => (b.date + b.createdAt).localeCompare(a.date + a.createdAt));
+  return list;
+}
+
+function renderTxTable() {
+  const list = filteredTx();
+
+  if (!list.length) {
+    $('#txWrap').innerHTML = `<div class="empty"><div class="big">◈</div><p>Aucune transaction trouvée.</p></div>`;
+    return;
+  }
+
+  $('#txWrap').innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th><th>Client</th><th>Description</th><th>Type</th>
+          <th>Mode</th><th class="t-right">Montant</th><th class="t-right">Équivalent HTG</th>
+          <th class="t-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${list.map(t => {
+          const c = getClient(t.clientId);
+          const nom = c ? `${c.prenom} ${c.nom}` : 'Client supprimé';
+          const isPay = t.type === 'paiement';
+          return `<tr>
+            <td style="white-space:nowrap;color:var(--muted)">${dateFR(t.date)}</td>
+            <td><b style="font-weight:600">${nom}</b></td>
+            <td style="color:var(--muted)">${t.note || '—'}</td>
+            <td><span class="tag ${isPay ? 'paid' : 'due'}">${isPay ? 'Paiement' : 'Facture'}</span></td>
+            <td><span class="tag ${t.devise === 'USD' ? 'usd' : 'htg'}">${t.methode || '—'}</span></td>
+            <td class="t-right money">
+              ${t.devise === 'USD' ? '$' : ''}${fmt(t.montant)} ${t.devise}
+            </td>
+            <td class="t-right money ${isPay ? 'pos' : ''}">${fmt(toHTG(t.montant, t.devise))}</td>
+            <td class="t-right" style="white-space:nowrap">
+              <button class="icon-btn" title="Modifier" onclick="openTxModal('${t.id}')">✎</button>
+              <button class="icon-btn" title="Supprimer" onclick="deleteTx('${t.id}')">✕</button>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
+['txSearch', 'txTypeFilter', 'financeDateFrom', 'financeDateTo']
+  .forEach(id => $('#' + id).addEventListener('input', renderTxTable));
+
+/* ---------- Modal transaction ---------- */
+function openTxModal(txId, presetType) {
+  if (!db.clients.length) {
+    toast('Ajoutez d\'abord un client.', true);
+    return;
+  }
+
+  const t = txId ? db.transactions.find(x => x.id === txId) : null;
+
+  $('#txModalTitle').textContent = t
+    ? 'Modifier la transaction'
+    : (presetType === 'paiement' ? 'Nouvel encaissement' : 'Nouvelle facture');
+
+  $('#t_id').value = t ? t.id : '';
+
+  $('#t_client').innerHTML = db.clients
+    .map(c => `<option value="${c.id}">${c.prenom} ${c.nom} — ${c.code}</option>`)
+    .join('');
+
+  if (t) {
+    $('#t_client').value = t.clientId;
+  } else if (window._presetClient) {
+    $('#t_client').value = window._presetClient;
+  }
+
+  const type = t ? t.type : (presetType || 'facture');
+  $('#ty_fact').checked = type === 'facture';
+  $('#ty_pay').checked  = type === 'paiement';
+
+  $('#t_montant').value = t ? t.montant : '';
+  $('#t_devise').value  = t ? t.devise : 'HTG';
+  $('#t_date').value    = t ? t.date : todayISO();
+  $('#t_methode').value = t ? (t.methode || 'Espèces') : (type === 'paiement' ? 'Espèces' : '—');
+  $('#t_note').value    = t ? (t.note || '') : '';
+
+  updateTxHint();
+  $('#txOverlay').classList.add('open');
+  setTimeout(() => $('#t_montant').focus(), 60);
+}
+
+function updateTxHint() {
+  const cid = $('#t_client').value;
+  const c = getClient(cid);
+  if (!c) { $('#txBalanceHint').textContent = ''; return; }
+  const t = clientTotals(cid);
+  $('#txBalanceHint').innerHTML =
+    `Solde actuel de <b>${c.prenom} ${c.nom}</b> : 
+     <b style="color:${t.solde > 0.5 ? 'var(--danger)' : 'var(--success)'}">${fmt(t.solde)} HTG</b> 
+     (facturé ${fmt(t.facture)} · payé ${fmt(t.paye)})`;
+}
+
+$('#t_client').addEventListener('change', updateTxHint);
+$('#t_montant').addEventListener('input', updateTxHint);
+
+function saveTx() {
+  const clientId = $('#t_client').value;
+  const montant  = parseFloat($('#t_montant').value);
+  const devise   = $('#t_devise').value;
+  const date     = $('#t_date').value || todayISO();
+  const type     = $('#ty_pay').checked ? 'paiement' : 'facture';
+  const methode  = $('#t_methode').value;
+  const note     = $('#t_note').value.trim();
+
+  if (!clientId) { toast('Sélectionnez un client.', true); return; }
+  if (!montant || montant <= 0) { toast('Entrez un montant valide.', true); return; }
+
+  const id = $('#t_id').value;
+
+  if (id) {
+    const t = db.transactions.find(x => x.id === id);
+    Object.assign(t, { clientId, montant, devise, date, type, methode, note });
+    toast('Transaction mise à jour.');
+  } else {
+    db.transactions.push({
+      id: uid(), clientId, montant, devise, date, type, methode, note,
+      createdAt: new Date().toISOString()
+    });
+    toast(type === 'paiement' ? 'Encaissement enregistré.' : 'Facture enregistrée.');
+  }
+
+  save();
+  closeModal('txOverlay');
+  refreshAll();
+}
+
+function deleteTx(id) {
+  if (!confirm('Supprimer cette transaction ?')) return;
+  db.transactions = db.transactions.filter(t => t.id !== id);
+  save();
+  toast('Transaction supprimée.');
+  refreshAll();
+}
+
+/* ---------- Export CSV ---------- */
+$('#exportTxBtn').addEventListener('click', () => {
+  const list = filteredTx();
+  if (!list.length) { toast('Rien à exporter.', true); return; }
+
+  const rows = [['Date', 'Client', 'Code', 'Type', 'Description', 'Mode', 'Montant', 'Devise', 'Equivalent HTG']];
+  list.forEach(t => {
+    const c = getClient(t.clientId);
+    rows.push([
+      t.date,
+      c ? `${c.prenom} ${c.nom}` : 'Supprimé',
+      c ? c.code : '',
+      t.type === 'paiement' ? 'Paiement' : 'Facture',
+      t.note || '',
+      t.methode || '',
+      t.montant,
+      t.devise,
+      Math.round(toHTG(t.montant, t.devise))
+    ]);
+  });
+
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `drpierre_transactions_${todayISO()}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Export CSV généré.');
+});
+
+/* =========================================================
+   9. DOSSIER CLIENT (DÉTAIL)
+   ========================================================= */
+function openDetail(id) {
+  const c = getClient(id);
+  if (!c) return;
+  const t = clientTotals(id);
+
+  const txs = db.transactions
+    .filter(x => x.clientId === id)
+    .sort((a, b) => (b.date + b.createdAt).localeCompare(a.date + a.createdAt));
+
+  const statut = t.solde > 0.5
+    ? (t.paye > 0 ? '<span class="tag part">Partiel</span>' : '<span class="tag due">Impayé</span>')
+    : '<span class="tag paid">Réglé</span>';
+
+  $('#detailContent').innerHTML = `
+    <div class="detail-hero">
+      <div class="avatar">${initials(c.prenom, c.nom)}</div>
+      <div style="flex:1;min-width:0">
+        <h3>${c.prenom} ${c.nom} ${statut}</h3>
+        <p>${c.code} · <span class="tag ${svcTag(c.service)}">${SERVICE_ICON[c.service] || ''} ${c.service}</span></p>
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div><div class="l">Total facturé</div><div class="v">${fmt(t.facture)}</div></div>
+      <div><div class="l">Total payé</div><div class="v" style="color:var(--success)">${fmt(t.paye)}</div></div>
+      <div><div class="l">Solde dû</div><div class="v" style="color:${t.solde > 0.5 ? 'var(--danger)' : 'var(--success)'}">${fmt(t.solde)}</div></div>
+    </div>
+
+    <div style="padding:18px 24px;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div>📞 <b style="color:var(--text)">${c.tel}</b></div>
+      <div>✉️ ${c.email || '—'}</div>
+      <div>📍 ${c.adresse || '—'}</div>
+      <div>📅 Inscrit le ${dateFR(c.createdAt)}</div>
+      ${c.notes ? `<div style="grid-column:1/-1">📝 ${c.notes}</div>` : ''}
+    </div>
+
+    <div style="max-height:340px;overflow-y:auto">
+      ${txs.length ? `
+      <table>
+        <thead><tr><th>Date</th><th>Description</th><th>Mode</th><th class="t-right">Montant</th><th class="t-right">HTG</th></tr></thead>
+        <tbody>
+          ${txs.map(x => {
+            const isPay = x.type === 'paiement';
+            return `<tr>
+              <td style="color:var(--muted);white-space:nowrap">${dateFR(x.date)}</td>
+              <td>${x.note || (isPay ? 'Paiement' : 'Facture')}</td>
+              <td><span class="tag ${isPay ? 'paid' : 'due'}">${isPay ? 'Paiement' : 'Facture'}</span></td>
+              <td class="t-right money">${x.devise === 'USD' ? '$' : ''}${fmt(x.montant)} ${x.devise}</td>
+              <td class="t-right money ${isPay ? 'pos' : ''}">${fmt(toHTG(x.montant, x.devise))}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>` : `<div class="empty"><p>Aucune transaction pour ce client.</p></div>`}
+    </div>
+  `;
+
+  window._presetClient = id;
+  $('#detailPayBtn').onclick = () => { closeModal('detailOverlay'); openTxModal(null, 'paiement'); };
+  $('#detailInvBtn').onclick = () => { closeModal('detailOverlay'); openTxModal(null, 'facture'); };
+
+  $('#detailOverlay').classList.add('open');
+}
+
+/* =========================================================
+   10. RAPPORTS
+   ========================================================= */
+function renderReports() {
+  const from = $('#rapportDateFrom').value;
+  const to   = $('#rapportDateTo').value;
+  const hasRange = !!(from || to);
+
+  const inFilter = t => !hasRange || inRange(t.date, from, to);
+
+  /* --- Par service --- */
+  const parService = {};
+  SERVICES.forEach(s => parService[s] = { facture: 0, paye: 0 });
+
+  db.transactions.forEach(t => {
+    if (!inFilter(t)) return;
+    const c = getClient(t.clientId);
+    if (!c) return;
+    const v = toHTG(t.montant, t.devise);
+    if (t.type === 'facture') parService[c.service].facture += v;
+    else parService[c.service].paye += v;
+  });
+
+  const maxSvc = Math.max(...SERVICES.map(s => parService[s].facture), 1);
+  const hasSvcData = SERVICES.some(s => parService[s].facture > 0 || parService[s].paye > 0);
+
+  $('#serviceReport').innerHTML = hasSvcData ? SERVICES.map(svc => {
+    const d = parService[svc];
+    return `
+    <div style="margin-bottom:22px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;gap:10px;flex-wrap:wrap">
+        <b>${SERVICE_ICON[svc]} ${svc}</b>
+        <span class="money">${fmt(d.facture)} HTG</span>
+      </div>
+      <div style="height:9px;background:#eef2f6;border-radius:5px;overflow:hidden">
+        <div style="height:100%;width:${(d.facture / maxSvc) * 100}%;background:linear-gradient(90deg,#3dd6b5,var(--primary));border-radius:5px"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--muted);gap:10px;flex-wrap:wrap">
+        <span>Encaissé : ${fmt(d.paye)} HTG</span>
+        <span style="color:${d.facture - d.paye > 0.5 ? 'var(--danger)' : 'var(--success)'}">
+          Solde : ${fmt(d.facture - d.paye)} HTG
+        </span>
+      </div>
+    </div>`;
+  }).join('') : `<div class="empty"><p>Aucune donnée pour cette période.</p></div>`;
+
+  /* --- Par mode de paiement --- */
+  const parMode = {};
+  db.transactions.filter(t => t.type === 'paiement' && inFilter(t)).forEach(t => {
+    const m = t.methode || 'Autre';
+    parMode[m] = (parMode[m] || 0) + toHTG(t.montant, t.devise);
+  });
+
+  const modes = Object.entries(parMode).sort((a, b) => b[1] - a[1]);
+  const totalModes = modes.reduce((s, [, v]) => s + v, 0) || 1;
+
+  $('#methodReport').innerHTML = modes.length ? modes.map(([m, v]) => `
+    <div style="margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:7px;gap:10px;flex-wrap:wrap">
+        <b>${m}</b>
+        <span class="money">${fmt(v)} HTG <small style="color:var(--muted);font-weight:600">(${((v / totalModes) * 100).toFixed(0)}%)</small></span>
+      </div>
+      <div style="height:9px;background:#eef2f6;border-radius:5px;overflow:hidden">
+        <div style="height:100%;width:${(v / totalModes) * 100}%;background:linear-gradient(90deg,#7cc7f5,#1a6fd4);border-radius:5px"></div>
+      </div>
+    </div>
+  `).join('') : `<div class="empty"><p>Aucun paiement sur cette période.</p></div>`;
+
+  /* --- Résumé mensuel --- */
+  const months = [];
+  const d = new Date();
+  d.setDate(1);
+  for (let i = 11; i >= 0; i--) {
+    const dt = new Date(d.getFullYear(), d.getMonth() - i, 1);
+    months.push({
+      key: `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`,
+      label: dt.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }),
+      facture: 0, paye: 0, nb: 0
+    });
+  }
+
+  db.transactions.forEach(t => {
+    if (!inFilter(t)) return;
+    const k = t.date.slice(0, 7);
+    const m = months.find(x => x.key === k);
+    if (!m) return;
+    const v = toHTG(t.montant, t.devise);
+    if (t.type === 'facture') m.facture += v; else { m.paye += v; m.nb++; }
+  });
+
+  const withData = months.filter(m => m.facture > 0 || m.paye > 0).reverse();
+
+  $('#monthlyWrap').innerHTML = withData.length ? `
+    <table>
+      <thead>
+        <tr>
+          <th>Mois</th><th class="t-right">Facturé</th><th class="t-right">Encaissé</th>
+          <th class="t-right">Solde</th><th class="t-right">Paiements</th><th class="t-right">Recouvrement</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${withData.map(m => {
+          const taux = m.facture > 0 ? (m.paye / m.facture) * 100 : 0;
+          return `<tr>
+            <td style="text-transform:capitalize"><b style="font-weight:600">${m.label}</b></td>
+            <td class="t-right money">${fmt(m.facture)}</td>
+            <td class="t-right money pos">${fmt(m.paye)}</td>
+            <td class="t-right money ${m.facture - m.paye > 0.5 ? 'neg' : ''}">${fmt(m.facture - m.paye)}</td>
+            <td class="t-right">${m.nb}</td>
+            <td class="t-right">
+              <span class="tag ${taux >= 80 ? 'paid' : taux >= 40 ? 'part' : 'due'}">${taux.toFixed(0)}%</span>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>` : `<div class="empty"><p>Aucune donnée sur cette période.</p></div>`;
+}
+
+['rapportDateFrom', 'rapportDateTo'].forEach(id =>
+  $('#' + id).addEventListener('input', renderReports)
+);
+
+/* =========================================================
+   11. FILTRES DE DATE — BOUTONS RAPIDES
+   ========================================================= */
+$$('.dr-quick').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const prefix = btn.dataset.quick; // 'client' | 'finance' | 'rapport'
+    const days = Number(btn.dataset.days);
+
+    const to = todayISO();
+    const d = new Date();
+    d.setDate(d.getDate() - days);
+    const from = d.toISOString().slice(0, 10);
+
+    const idFrom = prefix === 'rapport' ? 'rapportDateFrom' : prefix + 'DateFrom';
+    const idTo   = prefix === 'rapport' ? 'rapportDateTo'   : prefix + 'DateTo';
+
+    $('#' + idFrom).value = from;
+    $('#' + idTo).value   = to;
+
+    if (prefix === 'client')  renderClients();
+    if (prefix === 'finance') renderFinance();
+    if (prefix === 'rapport') renderReports();
+  });
+});
+
+$$('.clear-dr').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const prefix = btn.dataset.clear;
+    const idFrom = prefix === 'rapport' ? 'rapportDateFrom' : prefix + 'DateFrom';
+    const idTo   = prefix === 'rapport' ? 'rapportDateTo'   : prefix + 'DateTo';
+
+    $('#' + idFrom).value = '';
+    $('#' + idTo).value   = '';
+
+    if (prefix === 'client')  renderClients();
+    if (prefix === 'finance') renderFinance();
+    if (prefix === 'rapport') renderReports();
+  });
+});
+
+/* =========================================================
+   12. MODALES / DIVERS
+   ========================================================= */
+function closeModal(id) { $('#' + id).classList.remove('open'); }
+
+$$('.overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    $$('.overlay.open').forEach(o => o.classList.remove('open'));
+    closeSidebar();
+  }
+});
+
+/* Close slide-out sidebar when resizing back to desktop */
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 820) closeSidebar();
+});
+
+$('#tauxInput').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  if (v > 0) {
+    db.settings.taux = v;
+    save();
+    refreshAll();
+  }
+});
+
+$('#resetBtn').addEventListener('click', () => {
+  if (!confirm('Réinitialiser toutes les données et recharger la démonstration ?')) return;
+  localStorage.removeItem(DB_KEY);
+  location.reload();
+});
+
+/* =========================================================
+   13. INITIALISATION
+   ========================================================= */
+function refreshAll() {
+  const active = $('.nav-item.active')?.dataset.view || 'dashboard';
+  switchView(active);
+}
+
+(function init() {
+  if (!load() || !db.clients.length) {
+    seed();
+  }
+  $('#tauxInput').value = db.settings.taux;
+  switchView('dashboard');
+})();
+</script>
+
+</body>
+  </html>
